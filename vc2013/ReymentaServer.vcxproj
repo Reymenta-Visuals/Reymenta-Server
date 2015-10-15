@@ -74,8 +74,8 @@
       <IgnoreSpecificDefaultLibraries>LIBCMT;LIBCPMT</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y "..\..\..\blocks\Cinder-Spout\lib\Spout2.dll" "$(OutDir)"
-xcopy /y "..\..\..\blocks\Cinder-Spout\lib\SpoutPanel.exe" "$(OutDir)"</Command>
+      <Command>rem xcopy /y "..\..\..\blocks\Cinder-Spout\lib\Spout2.dll" "$(OutDir)"
+rem xcopy /y "..\..\..\blocks\Cinder-Spout\lib\SpoutPanel.exe" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
