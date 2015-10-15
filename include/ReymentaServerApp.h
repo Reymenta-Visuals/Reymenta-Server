@@ -61,7 +61,6 @@ public:
 	void 						keyDown(KeyEvent event) override;
 	void 						keyUp(KeyEvent event) override;
 	void 						fileDrop(FileDropEvent event) override;
-	void 						shutdown();
 
 	void 						updateWindowTitle();
 private:

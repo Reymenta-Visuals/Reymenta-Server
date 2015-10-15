@@ -98,6 +98,13 @@ void ReymentaServerApp::cleanup()
 {
 	// save warp settings
 	Warp::writeSettings(mWarps, writeFile(mSettings));
+	mBatchass->log("shutdown");
+
+	// save warp settings
+	//mBatchass->getWarpsRef()->save();
+	// save params
+	mParameterBag->save();
+	ui::Shutdown();
 }
 void ReymentaServerApp::fileDrop(FileDropEvent event)
 {
@@ -216,6 +223,7 @@ void ReymentaServerApp::fileDrop(FileDropEvent event)
 		mBatchass->getShadersRef()->createThumbsFromDir(mFile + "/");
 	}
 }
+
 void ReymentaServerApp::update()
 {
 	mParameterBag->iFps = getAverageFps();
@@ -428,12 +436,10 @@ void ReymentaServerApp::draw()
 
 #pragma region WebSockets
 	// websockets
-
 	ui::SetNextWindowSize(ImVec2(largeW, largeH), ImGuiSetCond_Once);
 	ui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
-	ui::Begin("OSC router");
+	ui::Begin("WebSockets server");
 	{
-
 		if (mParameterBag->mIsWebSocketsServer)
 		{
 			ui::Text("WS Server %d", mParameterBag->mWebSocketsPort);
