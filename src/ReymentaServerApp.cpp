@@ -7,6 +7,61 @@ void ReymentaServerApp::prepare( Settings *settings )
 
 void ReymentaServerApp::setup()
 {
+	int wr;
+	// parameters
+	mParameterBag = ParameterBag::create();
+	// utils
+	mBatchass = Batchass::create(mParameterBag);
+	mBatchass->log("setup");
+
+	wr = mBatchass->getWindowsResolution();
+
+	setWindowSize(mParameterBag->mMainWindowWidth, mParameterBag->mMainWindowHeight);
+	// 12 is enough for a router
+	setFrameRate(12.0f);
+	setWindowPos(ivec2(0, 0));
+
+	// if mStandalone, put on the 2nd screen
+	if (mParameterBag->mStandalone)
+	{
+		setWindowSize(mParameterBag->mRenderWidth, mParameterBag->mRenderHeight);
+		setWindowPos(ivec2(mParameterBag->mRenderX, mParameterBag->mRenderY));
+	}
+
+	// setup shaders and textures
+	mBatchass->setup();
+
+	mParameterBag->mMode = MODE_WARP;
+	mParameterBag->iResolution.x = mParameterBag->mRenderWidth;
+	mParameterBag->iResolution.y = mParameterBag->mRenderHeight;
+	mParameterBag->mRenderResolution = ivec2(mParameterBag->mRenderWidth, mParameterBag->mRenderHeight);
+
+	mBatchass->log("createRenderWindow, resolution:" + toString(mParameterBag->iResolution.x) + "x" + toString(mParameterBag->iResolution.y));
+	mParameterBag->mRenderResoXY = vec2(mParameterBag->mRenderWidth, mParameterBag->mRenderHeight);
+	mParameterBag->mRenderPosXY = ivec2(mParameterBag->mRenderX, mParameterBag->mRenderY);
+
+	// instanciate the console class
+	mConsole = AppConsole::create(mParameterBag, mBatchass);
+
+	// imgui
+	margin = 3;
+	inBetween = 3;
+	// mPreviewFboWidth 80 mPreviewFboHeight 60 margin 10 inBetween 15 mPreviewWidth = 160;mPreviewHeight = 120;
+	w = mParameterBag->mPreviewFboWidth + margin;
+	h = mParameterBag->mPreviewFboHeight * 2.3;
+	largeW = (mParameterBag->mPreviewFboWidth + margin) * 4;
+	largeH = (mParameterBag->mPreviewFboHeight + margin) * 5;
+	largePreviewW = mParameterBag->mPreviewWidth + margin;
+	largePreviewH = (mParameterBag->mPreviewHeight + margin) * 2.4;
+	displayHeight = mParameterBag->mMainDisplayHeight - 50;
+	mouseGlobal = false;
+	showConsole = showGlobal = showTextures = showAudio = showMidi = showChannels = showShaders = true;
+	showTest = showTheme = showOSC = showFbos = false;
+
+	// set ui window and io events callbacks
+	ui::initialize();
+
+	// warping
 	mUseBeginEnd = false;
 	updateWindowTitle();
 	disableFrameRate();

@@ -27,39 +27,82 @@ along with Cinder-Warping.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Warp.h"
 
+// UserInterface
+#include "CinderImGui.h"
+// parameters
+#include "ParameterBag.h"
+// Utils
+#include "Batchass.h"
+// Console
+#include "AppConsole.h"
 
 using namespace ci;
 using namespace ci::app;
 using namespace ph::warping;
 using namespace std;
+using namespace Reymenta;
 
 class ReymentaServerApp : public App {
 public:
-	static void prepare(Settings *settings);
+	static void 				prepare(Settings *settings);
 
-	void setup() override;
-	void cleanup() override;
-	void update() override;
-	void draw() override;
+	void 						setup() override;
+	void 						cleanup() override;
+	void 						update() override;
+	void 						draw() override;
 
-	void resize() override;
+	void 						resize() override;
 
-	void mouseMove(MouseEvent event) override;
-	void mouseDown(MouseEvent event) override;
-	void mouseDrag(MouseEvent event) override;
-	void mouseUp(MouseEvent event) override;
+	void 						mouseMove(MouseEvent event) override;
+	void 						mouseDown(MouseEvent event) override;
+	void 						mouseDrag(MouseEvent event) override;
+	void 						mouseUp(MouseEvent event) override;
 
-	void keyDown(KeyEvent event) override;
-	void keyUp(KeyEvent event) override;
+	void 						keyDown(KeyEvent event) override;
+	void 						keyUp(KeyEvent event) override;
+	void 						shutdown();
 
-	void updateWindowTitle();
+	void 						updateWindowTitle();
 private:
-	bool			mUseBeginEnd;
+	// parameters
+	ParameterBagRef				mParameterBag;
+	// utils
+	BatchassRef					mBatchass;
+	// console
+	AppConsoleRef				mConsole;
 
-	fs::path		mSettings;
+	static const int			MODE_WARP = 1;
 
-	gl::TextureRef	mImage;
-	WarpList		mWarps;
+	bool						mUseBeginEnd;
 
-	Area			mSrcArea;
+	fs::path					mSettings;
+
+	gl::TextureRef				mImage;
+	WarpList					mWarps;
+
+	Area						mSrcArea;
+
+	// imgui
+	float						color[4];
+	float						backcolor[4];
+	int							playheadPositions[12];
+	float						speeds[12];
+	int							w;
+	int							h;
+	int							displayHeight;
+	int							xPos;
+	int							yPos;
+	int							largeW;
+	int							largeH;
+	int							largePreviewW;
+	int							largePreviewH;
+	int							margin;
+	int							inBetween;
+
+	float						f = 0.0f;
+	char						buf[64];
+	bool						showConsole, showGlobal, showTextures, showTest, showMidi, showFbos, showTheme, showAudio, showShaders, showOSC, showChannels;
+	bool						mouseGlobal;
+	void						ShowAppConsole(bool* opened);
+
 };

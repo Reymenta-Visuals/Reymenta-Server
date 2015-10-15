@@ -114,9 +114,23 @@
   <ItemGroup>
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
-  <ItemGroup />
-  <ItemGroup />
   <ItemGroup>
+    <None Include="..\assets\0.glsl" />
+    <None Include="..\assets\1.glsl" />
+    <None Include="..\assets\2.glsl" />
+    <None Include="..\assets\3.glsl" />
+    <None Include="..\assets\4.glsl" />
+    <None Include="..\assets\live.frag" />
+    <None Include="..\assets\live.vert" />
+    <None Include="..\assets\mix.frag" />
+    <None Include="..\assets\passthru.frag" />
+    <None Include="..\assets\passthru.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\assets\Settings.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\AppConsole.h" />
     <ClInclude Include="..\include\ReymentaServerApp.h" />
     <ClInclude Include="..\include\Resources.h" />
     <ClInclude Include="..\..\..\blocks\Cinder-Hap2\src\HapSupport.h" />
@@ -137,7 +151,6 @@
     <ClInclude Include="..\..\..\blocks\Cinder-Reymenta\include\JSONWrapper.h" />
     <ClInclude Include="..\..\..\blocks\Cinder-Reymenta\include\Logger.h" />
     <ClInclude Include="..\..\..\blocks\Cinder-Reymenta\include\MessageRouter.h" />
-    <ClInclude Include="..\..\..\blocks\Cinder-Reymenta\include\OSCWrapper.h" />
     <ClInclude Include="..\..\..\blocks\Cinder-Reymenta\include\ParameterBag.h" />
     <ClInclude Include="..\..\..\blocks\Cinder-Reymenta\include\Shaders.h" />
     <ClInclude Include="..\..\..\blocks\Cinder-Reymenta\include\SpoutWrapper.h" />
@@ -168,6 +181,7 @@
     <ClInclude Include="..\..\..\blocks\OSC\src\osc\OscTypes.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\AppConsole.cpp" />
     <ClCompile Include="..\src\ReymentaServerApp.cpp" />
     <ClCompile Include="..\..\..\blocks\Cinder-Hap2\src\MovieHap.cpp" />
     <ClCompile Include="..\..\..\blocks\Cinder-Hap2\src\HapSupport.c" />
@@ -184,7 +198,6 @@
     <ClCompile Include="..\..\..\blocks\Cinder-Reymenta\src\JSONWrapper.cpp" />
     <ClCompile Include="..\..\..\blocks\Cinder-Reymenta\src\Logger.cpp" />
     <ClCompile Include="..\..\..\blocks\Cinder-Reymenta\src\MessageRouter.cpp" />
-    <ClCompile Include="..\..\..\blocks\Cinder-Reymenta\src\OSCWrapper.cpp" />
     <ClCompile Include="..\..\..\blocks\Cinder-Reymenta\src\ParameterBag.cpp" />
     <ClCompile Include="..\..\..\blocks\Cinder-Reymenta\src\Shaders.cpp" />
     <ClCompile Include="..\..\..\blocks\Cinder-Reymenta\src\SpoutWrapper.cpp" />
