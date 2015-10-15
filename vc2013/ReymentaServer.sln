@@ -1,0 +1,20 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ReymentaServer", "ReymentaServer.vcxproj", "{EAD4AFDE-F90B-45F7-97AE-2B8A40102712}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EAD4AFDE-F90B-45F7-97AE-2B8A40102712}.Debug|Win32.ActiveCfg = Debug|Win32
+		{EAD4AFDE-F90B-45F7-97AE-2B8A40102712}.Debug|Win32.Build.0 = Debug|Win32
+		{EAD4AFDE-F90B-45F7-97AE-2B8A40102712}.Release|Win32.ActiveCfg = Release|Win32
+		{EAD4AFDE-F90B-45F7-97AE-2B8A40102712}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
