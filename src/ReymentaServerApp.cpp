@@ -249,6 +249,55 @@ void ReymentaServerApp::update()
 		mParameterBag->iGlobalTime = getElapsedSeconds();
 	}
 	mParameterBag->iGlobalTime *= mParameterBag->iSpeedMultiplier;
+
+	if (ui::GetDrawData() != NULL) {
+		// Count
+		int cmd_count = 0;
+		int vtx_count = 0;
+		for (int n = 0; n < ui::GetDrawData()->CmdListsCount; n++)
+		{
+			const ImDrawList * cmd_list = ui::GetDrawData()->CmdLists[n];
+			const ImDrawVert * vtx_src = cmd_list->VtxBuffer.begin();
+			cmd_count += cmd_list->CmdBuffer.size();
+			vtx_count += cmd_list->VtxBuffer.size();
+		}
+
+		// Send 
+		static int sendframe = 0;
+		if (sendframe++ >= 12) // every 2 frames, @TWEAK
+		{
+			sendframe = 0;
+			mBatchass->preparePacketFrame(cmd_count, vtx_count);
+			// Add all drawcmds
+			Cmd cmd;
+			for (int n = 0; n < ui::GetDrawData()->CmdListsCount; n++)
+			{
+				const ImDrawList* cmd_list = ui::GetDrawData()->CmdLists[n];
+				const ImDrawCmd* pcmd_end = cmd_list->CmdBuffer.end();
+				for (const ImDrawCmd* pcmd = cmd_list->CmdBuffer.begin(); pcmd != pcmd_end; pcmd++)
+				{
+					cmd.Set(*pcmd);
+					mBatchass->Write(cmd);
+				}
+			}
+			// Add all vtx
+			Vtx vtx;
+			for (int n = 0; n < ui::GetDrawData()->CmdListsCount; n++)
+			{
+				const ImDrawList* cmd_list = ui::GetDrawData()->CmdLists[n];
+				const ImDrawVert* vtx_src = cmd_list->VtxBuffer.begin();
+				int vtx_remaining = cmd_list->VtxBuffer.size();
+				while (vtx_remaining-- > 0)
+				{
+					vtx.Set(*vtx_src++);
+					mBatchass->Write(vtx);
+				}
+			}
+			// Send
+			mBatchass->SendPacket();
+		}
+	}
+	ui::NewFrame();
 	mBatchass->update();
 }
 
@@ -454,10 +503,12 @@ void ReymentaServerApp::draw()
 		ui::SameLine();
 		if (ui::Button("Ping")) { mBatchass->wsPing(); }
 	}
+
 	ui::End();
 	xPos += largeW + margin;
-
 #pragma endregion WebSockets
+
+
 
 	// console
 	if (showConsole)
@@ -475,10 +526,7 @@ void ReymentaServerApp::draw()
 	{
 		ui::ShowTestWindow();
 		ui::ShowStyleEditor();
-
 	}
-	xPos += largePreviewH + margin;
-
 }
 // From imgui by Omar Cornut
 void ReymentaServerApp::ShowAppConsole(bool* opened)
