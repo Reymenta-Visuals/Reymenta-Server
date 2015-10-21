@@ -24,6 +24,9 @@ along with Cinder-Warping.  If not, see <http://www.gnu.org/licenses/>.
 #include "cinder/gl/Texture.h"
 #include "cinder/ImageIo.h"
 #include "cinder/Rand.h"
+// log
+#include "cinder/Log.h"
+
 
 #include "Warp.h"
 
@@ -35,6 +38,7 @@ along with Cinder-Warping.  If not, see <http://www.gnu.org/licenses/>.
 #include "Batchass.h"
 // Console
 #include "AppConsole.h"
+
 
 using namespace ci;
 using namespace ci::app;

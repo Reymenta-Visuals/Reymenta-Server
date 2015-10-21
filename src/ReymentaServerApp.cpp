@@ -4,6 +4,7 @@ void ReymentaServerApp::prepare(Settings *settings)
 {
 	settings->setWindowSize(1440, 900);
 }
+#define LOG_EXCEPTION( exc )	{ CI_LOG_E( "exception caught: " << System::demangleTypeName( typeid( exc ).name() ) << ", what: " << exc.what() ); }
 
 void ReymentaServerApp::setup()
 {
@@ -13,9 +14,18 @@ void ReymentaServerApp::setup()
 	// utils
 	mBatchass = Batchass::create(mParameterBag);
 	mBatchass->log("setup");
+	log::makeLogger<log::LoggerFileRotating>("/tmp/logging", "cinder.%Y.%m.%d.log");
+	auto sysLogger = log::makeLogger<log::LoggerSystem>();
+	sysLogger->setLoggingLevel(log::LEVEL_WARNING);
+	CI_LOG_V("VERBOSE log at " << getElapsedSeconds() << " seconds");
+	CI_LOG_D("DEBUG log at " << getElapsedSeconds() << " seconds");
+	CI_LOG_I("INFO log at " << getElapsedSeconds() << " seconds");
+	CI_LOG_W("WARNING log at " << getElapsedSeconds() << " seconds");
+	CI_LOG_E("ERROR log at " << getElapsedSeconds() << " seconds");
+	CI_LOG_F("FATAL log at " << getElapsedSeconds() << " seconds");
 
 	wr = mBatchass->getWindowsResolution();
-
+	CI_LOG_V("setup");
 	setWindowSize(mParameterBag->mMainWindowWidth, mParameterBag->mMainWindowHeight);
 	// 12 fps is enough for a router
 	setFrameRate(120.0f);
@@ -57,9 +67,20 @@ void ReymentaServerApp::setup()
 	mouseGlobal = false;
 	showConsole = showGlobal = showTextures = showAudio = showMidi = showChannels = showShaders = true;
 	showTest = showTheme = showOSC = showFbos = false;
-
 	// set ui window and io events callbacks
-	ui::initialize();
+	ui::initialize(ui::Options().NewFrameInMainApp(true));
+	unsigned char* pixels;
+	int width, height;
+	ImGui::GetIO().Fonts->GetTexDataAsAlpha8(&pixels, &width, &height);
+	GLuint tex_id;
+	glGenTextures(1, &tex_id);
+	glBindTexture(GL_TEXTURE_2D, tex_id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, pixels);
+
+	// Store our identifier
+	ImGui::GetIO().Fonts->TexID = (void *)(intptr_t)tex_id;
 
 	// warping
 	mUseBeginEnd = false;
@@ -91,6 +112,7 @@ void ReymentaServerApp::setup()
 	}
 	catch (const std::exception &e) {
 		console() << e.what() << std::endl;
+		LOG_EXCEPTION(e);
 	}
 }
 
@@ -297,6 +319,46 @@ void ReymentaServerApp::update()
 			mBatchass->SendPacket();
 		}
 	}
+	ImGuiIO& io = ImGui::GetIO();
+
+	// Setup resolution (every frame to accommodate for window resizing)
+	int w, h;
+	int display_w, display_h;
+
+	// Setup time step
+	static double time = 0.0f;
+	const double current_time = getElapsedSeconds();
+	io.DeltaTime = (float)(current_time - time);
+	time = current_time;
+
+	// @RemoteImgui begin
+	/*ImGui::RemoteUpdate();
+	ImGui::RemoteInput input;
+	if (ImGui::RemoteGetInput(input))
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		for (int i = 0; i < 256; i++)
+			io.KeysDown[i] = input.KeysDown[i];
+		io.KeyCtrl = input.KeyCtrl;
+		io.KeyShift = input.KeyShift;
+		io.MousePos = input.MousePos;
+		io.MouseDown[0] = (input.MouseButtons & 1);
+		io.MouseDown[1] = (input.MouseButtons & 2) != 0;
+		io.MouseWheel = (float)input.MouseWheel;
+	}
+	else*/
+		// @RemoteImgui end
+	{
+		// Setup inputs
+		// (we already got mouse wheel, keyboard keys & characters from glfw callbacks polled in glfwPollEvents())
+		//double mouse_x, mouse_y;
+		//glfwGetCursorPos(window, &mouse_x, &mouse_y);
+		//mouse_x *= (float)display_w / w;                                                               // Convert mouse coordinates to pixels
+		//mouse_y *= (float)display_h / h;
+		//io.MousePos = ImVec2((float)mouse_x, (float)mouse_y);                                          // Mouse position, in pixels (set to -1,-1 if no mouse / on another screen, etc.)
+		//io.MouseDown[0] = mousePressed[0] || glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) != 0;  // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
+		//io.MouseDown[1] = mousePressed[1] || glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) != 0;
+	}
 	ui::NewFrame();
 	mBatchass->update();
 }
@@ -340,7 +402,18 @@ void ReymentaServerApp::draw()
 	xPos = margin;
 	yPos = margin;
 	const char* warpInputs[] = { "mix", "left", "right", "warp1", "warp2", "preview", "abp", "live", "w8", "w9", "w10", "w11", "w12", "w13", "w14", "w15" };
+	ui::ScopedMainMenuBar mainMenu;
 
+	// File Menu
+	if (ui::BeginMenu("File")) {
+		ui::MenuItem("New");
+			
+		ui::MenuItem("Open");
+		ui::MenuItem("Save");
+		ui::MenuItem("Save As");
+
+		ui::EndMenu();
+	}
 #pragma region Info
 
 	ui::SetNextWindowSize(ImVec2(largePreviewW + 20, largePreviewH), ImGuiSetCond_Once);
