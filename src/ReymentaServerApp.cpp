@@ -2,32 +2,24 @@
 
 void ReymentaServerApp::prepare(Settings *settings)
 {
-	settings->setWindowSize(1440, 900);
+	//settings->setWindowSize(640, 480);
 }
 
 void ReymentaServerApp::setup()
 {
-	int wr;
 	// parameters
 	mParameterBag = ParameterBag::create();
+	mParameterBag->mLiveCode = true;
 	// utils
 	mBatchass = Batchass::create(mParameterBag);
 	CI_LOG_V("batchass setup");
 
-	wr = mBatchass->getWindowsResolution();
 
 	setWindowSize(mParameterBag->mMainWindowWidth, mParameterBag->mMainWindowHeight);
 	// 12 fps is enough for a router
-	setFrameRate(120.0f);
-	setWindowPos(ivec2(0, 0));
-
-	// if mStandalone, put on the 2nd screen
-	if (mParameterBag->mStandalone)
-	{
-		setWindowSize(mParameterBag->mRenderWidth, mParameterBag->mRenderHeight);
-		setWindowPos(ivec2(mParameterBag->mRenderX, mParameterBag->mRenderY));
-	}
-
+	setFrameRate(60.0f);
+	setWindowPos(ivec2(0, 40));
+	
 	// setup shaders and textures
 	mBatchass->setup();
 
@@ -57,9 +49,9 @@ void ReymentaServerApp::setup()
 	mouseGlobal = false;
 	showConsole = showGlobal = showTextures = showAudio = showMidi = showChannels = showShaders = true;
 	showTest = showTheme = showOSC = showFbos = false;
-	// set ui window and io events callbacks
-	ui::initialize(ui::Options().NewFrameInMainApp(true));
-	unsigned char* pixels;
+	// set ui window and io events callbacks 
+	ui::initialize(ui::Options().autoRender(false));
+	/*unsigned char* pixels;
 	int width, height;
 	ImGui::GetIO().Fonts->GetTexDataAsAlpha8(&pixels, &width, &height);
 	GLuint tex_id;
@@ -70,7 +62,7 @@ void ReymentaServerApp::setup()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, pixels);
 
 	// Store our identifier
-	ImGui::GetIO().Fonts->TexID = (void *)(intptr_t)tex_id;
+	ImGui::GetIO().Fonts->TexID = (void *)(intptr_t)tex_id;*/
 
 	// warping
 	mUseBeginEnd = false;
@@ -237,6 +229,7 @@ void ReymentaServerApp::fileDrop(FileDropEvent event)
 
 void ReymentaServerApp::update()
 {
+
 	mParameterBag->iFps = getAverageFps();
 	mParameterBag->sFps = toString(floor(mParameterBag->iFps));
 	getWindow()->setTitle("(" + mParameterBag->sFps + " fps) Server");
@@ -275,37 +268,40 @@ void ReymentaServerApp::update()
 
 		// Send 
 		static int sendframe = 0;
-		if (sendframe++ >= 12) // every 2 frames, @TWEAK
+		if (sendframe++ >= 240) // every 2 frames, @TWEAK
 		{
 			sendframe = 0;
-			mBatchass->preparePacketFrame(cmd_count, vtx_count);
-			// Add all drawcmds
-			Cmd cmd;
-			for (int n = 0; n < ui::GetDrawData()->CmdListsCount; n++)
-			{
-				const ImDrawList* cmd_list = ui::GetDrawData()->CmdLists[n];
-				const ImDrawCmd* pcmd_end = cmd_list->CmdBuffer.end();
-				for (const ImDrawCmd* pcmd = cmd_list->CmdBuffer.begin(); pcmd != pcmd_end; pcmd++)
+			if (cmd_count > 0 || vtx_count > 0) {
+
+				mBatchass->preparePacketFrame(cmd_count, vtx_count);
+				// Add all drawcmds
+				Cmd cmd;
+				for (int n = 0; n < ui::GetDrawData()->CmdListsCount; n++)
 				{
-					cmd.Set(*pcmd);
-					mBatchass->Write(cmd);
+					const ImDrawList* cmd_list = ui::GetDrawData()->CmdLists[n];
+					const ImDrawCmd* pcmd_end = cmd_list->CmdBuffer.end();
+					for (const ImDrawCmd* pcmd = cmd_list->CmdBuffer.begin(); pcmd != pcmd_end; pcmd++)
+					{
+						cmd.Set(*pcmd);
+						mBatchass->Write(cmd);
+					}
 				}
-			}
-			// Add all vtx
-			Vtx vtx;
-			for (int n = 0; n < ui::GetDrawData()->CmdListsCount; n++)
-			{
-				const ImDrawList* cmd_list = ui::GetDrawData()->CmdLists[n];
-				const ImDrawVert* vtx_src = cmd_list->VtxBuffer.begin();
-				int vtx_remaining = cmd_list->VtxBuffer.size();
-				while (vtx_remaining-- > 0)
+				// Add all vtx
+				Vtx vtx;
+				for (int n = 0; n < ui::GetDrawData()->CmdListsCount; n++)
 				{
-					vtx.Set(*vtx_src++);
-					mBatchass->Write(vtx);
+					const ImDrawList* cmd_list = ui::GetDrawData()->CmdLists[n];
+					const ImDrawVert* vtx_src = cmd_list->VtxBuffer.begin();
+					int vtx_remaining = cmd_list->VtxBuffer.size();
+					while (vtx_remaining-- > 0)
+					{
+						vtx.Set(*vtx_src++);
+						mBatchass->Write(vtx);
+					}
 				}
+				// Send
+				mBatchass->SendPacket();
 			}
-			// Send
-			mBatchass->SendPacket();
 		}
 	}
 	ImGuiIO& io = ImGui::GetIO();
@@ -348,8 +344,9 @@ void ReymentaServerApp::update()
 		//io.MouseDown[0] = mousePressed[0] || glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) != 0;  // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
 		//io.MouseDown[1] = mousePressed[1] || glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) != 0;
 	}
-	ui::NewFrame();
 	mBatchass->update();
+	ui::NewFrame();
+
 }
 
 void ReymentaServerApp::draw()
@@ -380,29 +377,29 @@ void ReymentaServerApp::draw()
 
 				// in this demo, we want to draw a specific area of our image,
 				// but if you want to draw the whole image, you can simply use: warp->draw( mImage );
-				warp->draw(mImage, mSrcArea);
+				warp->draw(mBatchass->getTexturesRef()->getTexture(11), mSrcArea);
 			}
 		}
 	}
 	gl::disableAlphaBlending();
 
 	//imgui
+
 	gl::setMatricesWindow(getWindowSize());
-	xPos = margin;
-	yPos = margin;
+	xPos = margin ;
+	yPos = margin + 30;
 	const char* warpInputs[] = { "mix", "left", "right", "warp1", "warp2", "preview", "abp", "live", "w8", "w9", "w10", "w11", "w12", "w13", "w14", "w15" };
-	ui::ScopedMainMenuBar mainMenu;
+	// err ui::ScopedMainMenuBar mainMenu;
+	//// File Menu
+	//if (ui::BeginMenu("File")) {
+	//	ui::MenuItem("New");
+	//		
+	//	ui::MenuItem("Open");
+	//	ui::MenuItem("Save");
+	//	ui::MenuItem("Save As");
 
-	// File Menu
-	if (ui::BeginMenu("File")) {
-		ui::MenuItem("New");
-			
-		ui::MenuItem("Open");
-		ui::MenuItem("Save");
-		ui::MenuItem("Save As");
-
-		ui::EndMenu();
-	}
+	//	ui::EndMenu();
+	//}
 #pragma region Info
 
 	ui::SetNextWindowSize(ImVec2(largePreviewW + 20, largePreviewH), ImGuiSetCond_Once);
@@ -460,6 +457,50 @@ void ReymentaServerApp::draw()
 
 #pragma endregion Info
 
+
+#pragma region WebSockets
+	// websockets
+	ui::SetNextWindowSize(ImVec2(largePreviewW + 20, largePreviewH), ImGuiSetCond_Once);
+	ui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
+	ui::Begin("WebSockets server");
+	{
+		if (mParameterBag->mIsWebSocketsServer)
+		{
+			ui::Text("WS Server %d", mParameterBag->mWebSocketsPort);
+			ui::Text("IP %s", mParameterBag->mWebSocketsHost.c_str());
+		}
+		else
+		{
+			ui::Text("WS Client %d", mParameterBag->mWebSocketsPort);
+			ui::Text("IP %s", mParameterBag->mWebSocketsHost.c_str());
+		}
+		if (ui::Button("Connect")) { mBatchass->wsConnect(); }
+		ui::SameLine();
+		if (ui::Button("Ping")) { mBatchass->wsPing(); }
+	}
+
+	ui::End();
+	xPos += largePreviewW + 20 + margin;
+#pragma endregion WebSockets
+
+
+	// console
+	if (showConsole)
+	{
+		ui::SetNextWindowSize(ImVec2((w + margin) * mParameterBag->MAX, largePreviewH), ImGuiSetCond_Once);
+		ui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
+		ShowAppConsole(&showConsole);
+		if (mParameterBag->newMsg)
+		{
+			mParameterBag->newMsg = false;
+			mConsole->AddLog(mParameterBag->mMsg.c_str());
+		}
+	}
+	if (showTest)
+	{
+		ui::ShowTestWindow();
+		ui::ShowStyleEditor();
+	}
 
 #pragma region MIDI
 
@@ -545,50 +586,9 @@ void ReymentaServerApp::draw()
 	}
 #pragma endregion OSC
 
-#pragma region WebSockets
-	// websockets
-	ui::SetNextWindowSize(ImVec2(largeW, largeH), ImGuiSetCond_Once);
-	ui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
-	ui::Begin("WebSockets server");
-	{
-		if (mParameterBag->mIsWebSocketsServer)
-		{
-			ui::Text("WS Server %d", mParameterBag->mWebSocketsPort);
-			ui::Text("IP %s", mParameterBag->mWebSocketsHost.c_str());
-		}
-		else
-		{
-			ui::Text("WS Client %d", mParameterBag->mWebSocketsPort);
-			ui::Text("IP %s", mParameterBag->mWebSocketsHost.c_str());
-		}
-		if (ui::Button("Connect")) { mBatchass->wsConnect(); }
-		ui::SameLine();
-		if (ui::Button("Ping")) { mBatchass->wsPing(); }
-	}
 
-	ui::End();
-	xPos += largeW + margin;
-#pragma endregion WebSockets
+	ui::Render();
 
-
-
-	// console
-	if (showConsole)
-	{
-		ui::SetNextWindowSize(ImVec2((w + margin) * mParameterBag->MAX, largePreviewH), ImGuiSetCond_Once);
-		ui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
-		ShowAppConsole(&showConsole);
-		if (mParameterBag->newMsg)
-		{
-			mParameterBag->newMsg = false;
-			mConsole->AddLog(mParameterBag->mMsg.c_str());
-		}
-	}
-	if (showTest)
-	{
-		ui::ShowTestWindow();
-		ui::ShowStyleEditor();
-	}
 }
 // From imgui by Omar Cornut
 void ReymentaServerApp::ShowAppConsole(bool* opened)
