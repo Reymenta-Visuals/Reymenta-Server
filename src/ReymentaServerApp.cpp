@@ -4,7 +4,6 @@ void ReymentaServerApp::prepare(Settings *settings)
 {
 	settings->setWindowSize(1440, 900);
 }
-#define LOG_EXCEPTION( exc )	{ CI_LOG_E( "exception caught: " << System::demangleTypeName( typeid( exc ).name() ) << ", what: " << exc.what() ); }
 
 void ReymentaServerApp::setup()
 {
@@ -13,19 +12,10 @@ void ReymentaServerApp::setup()
 	mParameterBag = ParameterBag::create();
 	// utils
 	mBatchass = Batchass::create(mParameterBag);
-	mBatchass->log("setup");
-	log::makeLogger<log::LoggerFileRotating>("/tmp/logging", "cinder.%Y.%m.%d.log");
-	auto sysLogger = log::makeLogger<log::LoggerSystem>();
-	sysLogger->setLoggingLevel(log::LEVEL_WARNING);
-	CI_LOG_V("VERBOSE log at " << getElapsedSeconds() << " seconds");
-	CI_LOG_D("DEBUG log at " << getElapsedSeconds() << " seconds");
-	CI_LOG_I("INFO log at " << getElapsedSeconds() << " seconds");
-	CI_LOG_W("WARNING log at " << getElapsedSeconds() << " seconds");
-	CI_LOG_E("ERROR log at " << getElapsedSeconds() << " seconds");
-	CI_LOG_F("FATAL log at " << getElapsedSeconds() << " seconds");
+	CI_LOG_V("batchass setup");
 
 	wr = mBatchass->getWindowsResolution();
-	CI_LOG_V("setup");
+
 	setWindowSize(mParameterBag->mMainWindowWidth, mParameterBag->mMainWindowHeight);
 	// 12 fps is enough for a router
 	setFrameRate(120.0f);
@@ -46,7 +36,7 @@ void ReymentaServerApp::setup()
 	mParameterBag->iResolution.y = mParameterBag->mRenderHeight;
 	mParameterBag->mRenderResolution = ivec2(mParameterBag->mRenderWidth, mParameterBag->mRenderHeight);
 
-	mBatchass->log("createRenderWindow, resolution:" + toString(mParameterBag->iResolution.x) + "x" + toString(mParameterBag->iResolution.y));
+	CI_LOG_V("createRenderWindow, resolution:" + toString(mParameterBag->iResolution.x) + "x" + toString(mParameterBag->iResolution.y));
 	mParameterBag->mRenderResoXY = vec2(mParameterBag->mRenderWidth, mParameterBag->mRenderHeight);
 	mParameterBag->mRenderPosXY = ivec2(mParameterBag->mRenderX, mParameterBag->mRenderY);
 
@@ -112,7 +102,6 @@ void ReymentaServerApp::setup()
 	}
 	catch (const std::exception &e) {
 		console() << e.what() << std::endl;
-		LOG_EXCEPTION(e);
 	}
 }
 
@@ -120,7 +109,7 @@ void ReymentaServerApp::cleanup()
 {
 	// save warp settings
 	Warp::writeSettings(mWarps, writeFile(mSettings));
-	mBatchass->log("shutdown");
+	CI_LOG_V("shutdown");
 
 	// save warp settings
 	//mBatchass->getWarpsRef()->save();
@@ -203,7 +192,7 @@ void ReymentaServerApp::fileDrop(FileDropEvent event)
 			}
 			catch (cinder::JsonTree::Exception exception)
 			{
-				mBatchass->log("patchjsonparser exception " + mFile + ": " + exception.what());
+				CI_LOG_V("patchjsonparser exception " + mFile + ": " + exception.what());
 
 			}
 			//Assets
@@ -215,7 +204,7 @@ void ReymentaServerApp::fileDrop(FileDropEvent event)
 				int channel = jsonElement->getChild("channel").getValue<int>();
 				if (channel < mBatchass->getTexturesRef()->getTextureCount())
 				{
-					mBatchass->log("asset filename: " + jsonFileName);
+					CI_LOG_V("asset filename: " + jsonFileName);
 					mBatchass->getTexturesRef()->setTexture(channel, jsonFileName);
 				}
 				i++;
@@ -224,7 +213,7 @@ void ReymentaServerApp::fileDrop(FileDropEvent event)
 		}
 		catch (...)
 		{
-			mBatchass->log("patchjson parsing error: " + mFile);
+			CI_LOG_V("patchjson parsing error: " + mFile);
 		}
 	}
 	else if (ext == "txt")

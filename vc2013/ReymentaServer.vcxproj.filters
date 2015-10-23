@@ -180,9 +180,6 @@
     <ClInclude Include="..\..\..\blocks\Cinder-Reymenta\include\JSONWrapper.h">
       <Filter>Blocks\Reymenta\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\blocks\Cinder-Reymenta\include\Logger.h">
-      <Filter>Blocks\Reymenta\include</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\blocks\Cinder-Reymenta\include\MessageRouter.h">
       <Filter>Blocks\Reymenta\include</Filter>
     </ClInclude>
@@ -211,9 +208,6 @@
       <Filter>Blocks\Reymenta\src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\blocks\Cinder-Reymenta\src\JSONWrapper.cpp">
-      <Filter>Blocks\Reymenta\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\blocks\Cinder-Reymenta\src\Logger.cpp">
       <Filter>Blocks\Reymenta\src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\blocks\Cinder-Reymenta\src\MessageRouter.cpp">
@@ -369,6 +363,9 @@
     <ClCompile Include="..\..\..\blocks\Cinder-Reymenta\src\xxhash.c">
       <Filter>Blocks\Reymenta\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\blocks\Cinder-Reymenta\src\Logan.cpp">
+      <Filter>Blocks\Reymenta\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Resources.h">
@@ -393,6 +390,9 @@
       <Filter>Blocks\Reymenta\include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\blocks\Cinder-Reymenta\include\xxhash.h">
+      <Filter>Blocks\Reymenta\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\blocks\Cinder-Reymenta\include\Logan.h">
       <Filter>Blocks\Reymenta\include</Filter>
     </ClInclude>
   </ItemGroup>
