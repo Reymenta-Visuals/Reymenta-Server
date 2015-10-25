@@ -2,7 +2,7 @@
 
 void ReymentaServerApp::prepare(Settings *settings)
 {
-	//settings->setWindowSize(640, 480);
+	//settings->setResizable(false);
 }
 
 void ReymentaServerApp::setup()
@@ -10,9 +10,11 @@ void ReymentaServerApp::setup()
 	// parameters
 	mParameterBag = ParameterBag::create();
 	mParameterBag->mLiveCode = true;
+	mParameterBag->mRenderThumbs = false;
+	loadShader(getAssetPath("default.fs"));
 	// utils
 	mBatchass = Batchass::create(mParameterBag);
-	CI_LOG_V("batchass setup");
+	CI_LOG_V("reymenta setup");
 
 
 	setWindowSize(mParameterBag->mMainWindowWidth, mParameterBag->mMainWindowHeight);
@@ -49,21 +51,26 @@ void ReymentaServerApp::setup()
 	mouseGlobal = false;
 	showConsole = showGlobal = showTextures = showAudio = showMidi = showChannels = showShaders = true;
 	showTest = showTheme = showOSC = showFbos = false;
-	// set ui window and io events callbacks 
-	ui::initialize(ui::Options().autoRender(false));
-	/*unsigned char* pixels;
-	int width, height;
-	ImGui::GetIO().Fonts->GetTexDataAsAlpha8(&pixels, &width, &height);
-	GLuint tex_id;
-	glGenTextures(1, &tex_id);
-	glBindTexture(GL_TEXTURE_2D, tex_id);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, pixels);
-
-	// Store our identifier
-	ImGui::GetIO().Fonts->TexID = (void *)(intptr_t)tex_id;*/
-
+	/* set ui window and io events callbacks 
+	   with autorender == false, we have to use NewFrame and Render
+		but we have access to DrawData to send to remoteImGui
+		void Renderer::initFontTexture()
+		{
+		unsigned char* pixels;
+		int width, height;
+		ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+		mFontTexture = gl::Texture::create( pixels, GL_RGBA, width, height, gl::Texture::Format().magFilter(GL_LINEAR).minFilter(GL_LINEAR) );
+		ImGui::GetIO().Fonts->ClearTexData();
+		ImGui::GetIO().Fonts->TexID = (void *)(intptr_t) mFontTexture->getId();
+		}
+	*/
+	ui::initialize(ui::Options().autoRender(false).fonts({
+					{ getAssetPath("KontrapunktBob-Light.ttf"), 12 },
+					{ getAssetPath("KontrapunktBob-Bold.ttf"), 20 },
+					{ getAssetPath("DroidSans.ttf"), 12 }
+				})
+				.fontGlyphRanges("DroidSans", { 0xf000, 0xf06e, 0 }));
+	
 	// warping
 	mUseBeginEnd = false;
 	updateWindowTitle();
@@ -95,6 +102,7 @@ void ReymentaServerApp::setup()
 	catch (const std::exception &e) {
 		console() << e.what() << std::endl;
 	}
+	mMesh = gl::VboMesh::create(geom::Rect());
 }
 
 void ReymentaServerApp::cleanup()
@@ -108,6 +116,26 @@ void ReymentaServerApp::cleanup()
 	// save params
 	mParameterBag->save();
 	ui::Shutdown();
+}
+void ReymentaServerApp::loadShader(const fs::path &fragment_path)
+{
+	try
+	{	// load and compile our shader
+		mProg = gl::GlslProg::create(gl::GlslProg::Format().vertex(loadAsset("default.vs"))
+			.fragment(loadFile(fragment_path)));
+		// no exceptions occurred, so store the shader's path for reloading on keypress
+		//mCurrentShaderPath = fragment_path;
+		mProg->uniform("iResolution", vec3(getWindowWidth(), getWindowHeight(), 0.0f));
+
+	}
+	catch (ci::gl::GlslProgCompileExc &exc)
+	{
+		console() << "Error compiling shader: " << exc.what() << endl;
+	}
+	catch (ci::Exception &exc)
+	{
+		console() << "Error loading shader: " << exc.what() << endl;
+	}
 }
 void ReymentaServerApp::fileDrop(FileDropEvent event)
 {
@@ -229,6 +257,8 @@ void ReymentaServerApp::fileDrop(FileDropEvent event)
 
 void ReymentaServerApp::update()
 {
+	CI_LOG_V("update begin");
+	CI_LOG_V(getElapsedFrames());
 
 	mParameterBag->iFps = getAverageFps();
 	mParameterBag->sFps = toString(floor(mParameterBag->iFps));
@@ -345,12 +375,19 @@ void ReymentaServerApp::update()
 		//io.MouseDown[1] = mousePressed[1] || glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) != 0;
 	}
 	mBatchass->update();
-	ui::NewFrame();
+	mProg->uniform("iGlobalTime", static_cast<float>(getElapsedSeconds()));
+	//mProg->uniform("iMouse", mMouseCoord);
+	//mProg->uniform("iChannel0", 0);
+
+	CI_LOG_V("update end");
+	CI_LOG_V(getElapsedFrames());
 
 }
 
 void ReymentaServerApp::draw()
 {
+	CI_LOG_V("draw begin");
+	CI_LOG_V(getElapsedFrames());
 	// clear the window and set the drawing color to white
 	gl::clear();
 	gl::color(Color::white());
@@ -382,24 +419,13 @@ void ReymentaServerApp::draw()
 		}
 	}
 	gl::disableAlphaBlending();
-
 	//imgui
+	ui::NewFrame();
 
 	gl::setMatricesWindow(getWindowSize());
 	xPos = margin ;
 	yPos = margin + 30;
-	const char* warpInputs[] = { "mix", "left", "right", "warp1", "warp2", "preview", "abp", "live", "w8", "w9", "w10", "w11", "w12", "w13", "w14", "w15" };
-	// err ui::ScopedMainMenuBar mainMenu;
-	//// File Menu
-	//if (ui::BeginMenu("File")) {
-	//	ui::MenuItem("New");
-	//		
-	//	ui::MenuItem("Open");
-	//	ui::MenuItem("Save");
-	//	ui::MenuItem("Save As");
 
-	//	ui::EndMenu();
-	//}
 #pragma region Info
 
 	ui::SetNextWindowSize(ImVec2(largePreviewW + 20, largePreviewH), ImGuiSetCond_Once);
@@ -586,8 +612,14 @@ void ReymentaServerApp::draw()
 	}
 #pragma endregion OSC
 
-
 	ui::Render();
+	
+	//gl::ScopedGlslProg shader(mBatchass->getShadersRef()->getLiveShader());
+	gl::ScopedGlslProg shader(mProg);
+
+	gl::draw(mMesh);
+	CI_LOG_V("draw end");
+	CI_LOG_V(getElapsedFrames());
 
 }
 // From imgui by Omar Cornut

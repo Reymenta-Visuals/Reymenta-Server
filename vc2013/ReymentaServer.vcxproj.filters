@@ -432,6 +432,12 @@
     <None Include="..\assets\passthru.vert">
       <Filter>assets</Filter>
     </None>
+    <None Include="..\assets\default.vs">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="..\assets\default.fs">
+      <Filter>assets</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\assets\Settings.xml">

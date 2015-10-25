@@ -64,6 +64,8 @@ public:
 	void 						fileDrop(FileDropEvent event) override;
 
 	void 						updateWindowTitle();
+	void						loadShader(const fs::path &fragment_path);
+
 private:
 	// parameters
 	ParameterBagRef				mParameterBag;
@@ -71,6 +73,9 @@ private:
 	BatchassRef					mBatchass;
 	// console
 	AppConsoleRef				mConsole;
+
+	gl::VboMeshRef				mMesh;
+	gl::GlslProgRef				mProg;
 
 	static const int			MODE_WARP = 1;
 
@@ -99,7 +104,7 @@ private:
 	int							largePreviewH;
 	int							margin;
 	int							inBetween;
-
+	//bool						sNewFrame;
 	float						f = 0.0f;
 	char						buf[64];
 	bool						showConsole, showGlobal, showTextures, showTest, showMidi, showFbos, showTheme, showAudio, showShaders, showOSC, showChannels;
