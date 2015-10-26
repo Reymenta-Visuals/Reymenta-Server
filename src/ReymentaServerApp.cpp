@@ -285,66 +285,68 @@ void ReymentaServerApp::update()
 	mParameterBag->iGlobalTime *= mParameterBag->iSpeedMultiplier;
 
 	if (ui::GetDrawData() != NULL) {
-		// Count
-		int cmd_count = 0;
-		int vtx_count = 0;
-		for (int n = 0; n < ui::GetDrawData()->CmdListsCount; n++)
-		{
-			const ImDrawList * cmd_list = ui::GetDrawData()->CmdLists[n];
-			const ImDrawVert * vtx_src = cmd_list->VtxBuffer.begin();
-			cmd_count += cmd_list->CmdBuffer.size();
-			vtx_count += cmd_list->VtxBuffer.size();
-		}
+		if (mBatchass->isRemoteClientActive()) {
+			// Count
+			int cmd_count = 0;
+			int vtx_count = 0;
+			for (int n = 0; n < ui::GetDrawData()->CmdListsCount; n++)
+			{
+				const ImDrawList * cmd_list = ui::GetDrawData()->CmdLists[n];
+				const ImDrawVert * vtx_src = cmd_list->VtxBuffer.begin();
+				cmd_count += cmd_list->CmdBuffer.size();
+				vtx_count += cmd_list->VtxBuffer.size();
+			}
 
-		// Send 
-		static int sendframe = 0;
-		if (sendframe++ >= 240) // every 2 frames, @TWEAK
-		{
-			sendframe = 0;
-			if (cmd_count > 0 || vtx_count > 0) {
+			// Send 
+			static int sendframe = 0;
+			if (sendframe++ >= 240) // every 2 frames, @TWEAK
+			{
+				sendframe = 0;
+				if (cmd_count > 0 || vtx_count > 0) {
 
-				mBatchass->preparePacketFrame(cmd_count, vtx_count);
-				// Add all drawcmds
-				Cmd cmd;
-				for (int n = 0; n < ui::GetDrawData()->CmdListsCount; n++)
-				{
-					const ImDrawList* cmd_list = ui::GetDrawData()->CmdLists[n];
-					const ImDrawCmd* pcmd_end = cmd_list->CmdBuffer.end();
-					for (const ImDrawCmd* pcmd = cmd_list->CmdBuffer.begin(); pcmd != pcmd_end; pcmd++)
+					mBatchass->preparePacketFrame(cmd_count, vtx_count);
+					// Add all drawcmds
+					Cmd cmd;
+					for (int n = 0; n < ui::GetDrawData()->CmdListsCount; n++)
 					{
-						cmd.Set(*pcmd);
-						mBatchass->Write(cmd);
+						const ImDrawList* cmd_list = ui::GetDrawData()->CmdLists[n];
+						const ImDrawCmd* pcmd_end = cmd_list->CmdBuffer.end();
+						for (const ImDrawCmd* pcmd = cmd_list->CmdBuffer.begin(); pcmd != pcmd_end; pcmd++)
+						{
+							cmd.Set(*pcmd);
+							mBatchass->Write(cmd);
+						}
 					}
-				}
-				// Add all vtx
-				Vtx vtx;
-				for (int n = 0; n < ui::GetDrawData()->CmdListsCount; n++)
-				{
-					const ImDrawList* cmd_list = ui::GetDrawData()->CmdLists[n];
-					const ImDrawVert* vtx_src = cmd_list->VtxBuffer.begin();
-					int vtx_remaining = cmd_list->VtxBuffer.size();
-					while (vtx_remaining-- > 0)
+					// Add all vtx
+					Vtx vtx;
+					for (int n = 0; n < ui::GetDrawData()->CmdListsCount; n++)
 					{
-						vtx.Set(*vtx_src++);
-						mBatchass->Write(vtx);
+						const ImDrawList* cmd_list = ui::GetDrawData()->CmdLists[n];
+						const ImDrawVert* vtx_src = cmd_list->VtxBuffer.begin();
+						int vtx_remaining = cmd_list->VtxBuffer.size();
+						while (vtx_remaining-- > 0)
+						{
+							vtx.Set(*vtx_src++);
+							mBatchass->Write(vtx);
+						}
 					}
+					// Send
+					mBatchass->SendPacket();
 				}
-				// Send
-				mBatchass->SendPacket();
 			}
 		}
+		ImGuiIO& io = ImGui::GetIO();
+
+		// Setup resolution (every frame to accommodate for window resizing)
+		int w, h;
+		int display_w, display_h;
+
+		// Setup time step
+		static double time = 0.0f;
+		const double current_time = getElapsedSeconds();
+		io.DeltaTime = (float)(current_time - time);
+		time = current_time;
 	}
-	ImGuiIO& io = ImGui::GetIO();
-
-	// Setup resolution (every frame to accommodate for window resizing)
-	int w, h;
-	int display_w, display_h;
-
-	// Setup time step
-	static double time = 0.0f;
-	const double current_time = getElapsedSeconds();
-	io.DeltaTime = (float)(current_time - time);
-	time = current_time;
 
 	// @RemoteImgui begin
 	/*ImGui::RemoteUpdate();
