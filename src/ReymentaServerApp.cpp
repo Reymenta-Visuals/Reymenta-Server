@@ -616,8 +616,8 @@ void ReymentaServerApp::draw()
 
 	ui::Render();
 	
-	//gl::ScopedGlslProg shader(mBatchass->getShadersRef()->getLiveShader());
-	gl::ScopedGlslProg shader(mProg);
+	gl::ScopedGlslProg shader(mBatchass->getShadersRef()->getLiveShader());
+	//gl::ScopedGlslProg shader(mProg);
 
 	gl::draw(mMesh);
 	CI_LOG_V("draw end");
