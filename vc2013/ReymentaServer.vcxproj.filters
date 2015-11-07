@@ -438,6 +438,9 @@
     <None Include="..\assets\default.fs">
       <Filter>assets</Filter>
     </None>
+    <None Include="..\assets\shadertoy.inc">
+      <Filter>assets</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\assets\Settings.xml">

@@ -127,6 +127,7 @@ rem xcopy /y "..\..\..\blocks\Cinder-Spout\lib\SpoutPanel.exe" "$(OutDir)"</Com
     <None Include="..\assets\mix.frag" />
     <None Include="..\assets\passthru.frag" />
     <None Include="..\assets\passthru.vert" />
+    <None Include="..\assets\shadertoy.inc" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\assets\Settings.xml" />

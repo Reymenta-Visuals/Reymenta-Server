@@ -257,8 +257,8 @@ void ReymentaServerApp::fileDrop(FileDropEvent event)
 
 void ReymentaServerApp::update()
 {
-	CI_LOG_V("update begin");
-	CI_LOG_V(getElapsedFrames());
+	//CI_LOG_V("update begin");
+	//CI_LOG_V(getElapsedFrames());
 
 	mParameterBag->iFps = getAverageFps();
 	mParameterBag->sFps = toString(floor(mParameterBag->iFps));
@@ -381,15 +381,15 @@ void ReymentaServerApp::update()
 	//mProg->uniform("iMouse", mMouseCoord);
 	//mProg->uniform("iChannel0", 0);
 
-	CI_LOG_V("update end");
-	CI_LOG_V(getElapsedFrames());
+	//CI_LOG_V("update end");
+	//CI_LOG_V(getElapsedFrames());
 
 }
 
 void ReymentaServerApp::draw()
 {
-	CI_LOG_V("draw begin");
-	CI_LOG_V(getElapsedFrames());
+	//CI_LOG_V("draw begin");
+	//CI_LOG_V(getElapsedFrames());
 	// clear the window and set the drawing color to white
 	gl::clear();
 	gl::color(Color::white());
@@ -620,8 +620,8 @@ void ReymentaServerApp::draw()
 	//gl::ScopedGlslProg shader(mProg);
 
 	gl::draw(mMesh);
-	CI_LOG_V("draw end");
-	CI_LOG_V(getElapsedFrames());
+	//CI_LOG_V("draw end");
+	//CI_LOG_V(getElapsedFrames());
 
 }
 // From imgui by Omar Cornut
