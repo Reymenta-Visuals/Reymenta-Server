@@ -88,9 +88,6 @@
     <Filter Include="Blocks\OSC\src\ip\win32">
       <UniqueIdentifier>{C4050856-8475-45E5-89AA-B802D25E3816}</UniqueIdentifier>
     </Filter>
-    <Filter Include="assets">
-      <UniqueIdentifier>{05b28db4-b370-4f4b-bb2b-19cc6cbcb46a}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\ReymentaServerApp.cpp">
@@ -400,51 +397,5 @@
     <ResourceCompile Include="Resources.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\assets\0.glsl">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="..\assets\1.glsl">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="..\assets\2.glsl">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="..\assets\3.glsl">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="..\assets\4.glsl">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="..\assets\live.frag">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="..\assets\live.vert">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="..\assets\mix.frag">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="..\assets\passthru.frag">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="..\assets\passthru.vert">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="..\assets\default.vs">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="..\assets\default.fs">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="..\assets\shadertoy.inc">
-      <Filter>assets</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="..\assets\Settings.xml">
-      <Filter>assets</Filter>
-    </Xml>
   </ItemGroup>
 </Project>

@@ -21,6 +21,7 @@ along with Cinder-Warping.  If not, see <http://www.gnu.org/licenses/>.
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
+#include "cinder/gl/GlslProg.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/ImageIo.h"
 #include "cinder/Rand.h"
@@ -110,5 +111,7 @@ private:
 	bool						showConsole, showGlobal, showTextures, showTest, showMidi, showFbos, showTheme, showAudio, showShaders, showOSC, showChannels;
 	bool						mouseGlobal;
 	void						ShowAppConsole(bool* opened);
+	// log only the first time
+	bool						mFirstLaunch;
 
 };

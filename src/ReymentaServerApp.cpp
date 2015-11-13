@@ -15,13 +15,13 @@ void ReymentaServerApp::setup()
 	// utils
 	mBatchass = Batchass::create(mParameterBag);
 	CI_LOG_V("reymenta setup");
-
+	mFirstLaunch = true;
 
 	setWindowSize(mParameterBag->mMainWindowWidth, mParameterBag->mMainWindowHeight);
 	// 12 fps is enough for a router
-	setFrameRate(60.0f);
+	setFrameRate(120.0f);
 	setWindowPos(ivec2(0, 40));
-	
+
 	// setup shaders and textures
 	mBatchass->setup();
 
@@ -51,26 +51,27 @@ void ReymentaServerApp::setup()
 	mouseGlobal = false;
 	showConsole = showGlobal = showTextures = showAudio = showMidi = showChannels = showShaders = true;
 	showTest = showTheme = showOSC = showFbos = false;
-	/* set ui window and io events callbacks 
+	/* set ui window and io events callbacks
 	   with autorender == false, we have to use NewFrame and Render
-		but we have access to DrawData to send to remoteImGui
-		void Renderer::initFontTexture()
-		{
-		unsigned char* pixels;
-		int width, height;
-		ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-		mFontTexture = gl::Texture::create( pixels, GL_RGBA, width, height, gl::Texture::Format().magFilter(GL_LINEAR).minFilter(GL_LINEAR) );
-		ImGui::GetIO().Fonts->ClearTexData();
-		ImGui::GetIO().Fonts->TexID = (void *)(intptr_t) mFontTexture->getId();
-		}
-	*/
+	   but we have access to DrawData to send to remoteImGui
+	   void Renderer::initFontTexture()
+	   {
+	   unsigned char* pixels;
+	   int width, height;
+	   ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+	   mFontTexture = gl::Texture::create( pixels, GL_RGBA, width, height, gl::Texture::Format().magFilter(GL_LINEAR).minFilter(GL_LINEAR) );
+	   ImGui::GetIO().Fonts->ClearTexData();
+	   ImGui::GetIO().Fonts->TexID = (void *)(intptr_t) mFontTexture->getId();
+	   }
+	  
 	ui::initialize(ui::Options().autoRender(false).fonts({
-					{ getAssetPath("KontrapunktBob-Light.ttf"), 12 },
-					{ getAssetPath("KontrapunktBob-Bold.ttf"), 20 },
-					{ getAssetPath("DroidSans.ttf"), 12 }
-				})
-				.fontGlyphRanges("DroidSans", { 0xf000, 0xf06e, 0 }));
-	
+		{ getAssetPath("KontrapunktBob-Light.ttf"), 12 },
+		{ getAssetPath("KontrapunktBob-Bold.ttf"), 20 },
+		{ getAssetPath("DroidSans.ttf"), 12 }
+	})
+	.fontGlyphRanges("DroidSans", { 0xf000, 0xf06e, 0 })); */
+	ui::initialize(ui::Options().autoRender(false));
+
 	// warping
 	mUseBeginEnd = false;
 	updateWindowTitle();
@@ -94,7 +95,7 @@ void ReymentaServerApp::setup()
 		mImage = gl::Texture::create(loadImage(loadAsset("help.jpg")),
 			gl::Texture2d::Format().loadTopDown().mipmap(true).minFilter(GL_LINEAR_MIPMAP_LINEAR));
 
-		mSrcArea = mImage->getBounds();
+		//mSrcArea = mImage->getBounds();
 
 		// adjust the content size of the warps
 		Warp::setSize(mWarps, mImage->getSize());
@@ -102,6 +103,7 @@ void ReymentaServerApp::setup()
 	catch (const std::exception &e) {
 		console() << e.what() << std::endl;
 	}
+	mSrcArea = Area(0, 0, mParameterBag->mFboWidth*4, mParameterBag->mFboHeight*4);
 	mMesh = gl::VboMesh::create(geom::Rect());
 }
 
@@ -126,7 +128,7 @@ void ReymentaServerApp::loadShader(const fs::path &fragment_path)
 		// no exceptions occurred, so store the shader's path for reloading on keypress
 		//mCurrentShaderPath = fragment_path;
 		mProg->uniform("iResolution", vec3(getWindowWidth(), getWindowHeight(), 0.0f));
-
+		//const vector<Uniform> & unicorns = mProg->getActiveUniforms();
 	}
 	catch (ci::gl::GlslProgCompileExc &exc)
 	{
@@ -257,9 +259,10 @@ void ReymentaServerApp::fileDrop(FileDropEvent event)
 
 void ReymentaServerApp::update()
 {
-	//CI_LOG_V("update begin");
-	//CI_LOG_V(getElapsedFrames());
-
+	if (mFirstLaunch) {
+		CI_LOG_V("update begin");
+		CI_LOG_V(getElapsedFrames());
+	}
 	mParameterBag->iFps = getAverageFps();
 	mParameterBag->sFps = toString(floor(mParameterBag->iFps));
 	getWindow()->setTitle("(" + mParameterBag->sFps + " fps) Server");
@@ -353,18 +356,18 @@ void ReymentaServerApp::update()
 	ImGui::RemoteInput input;
 	if (ImGui::RemoteGetInput(input))
 	{
-		ImGuiIO& io = ImGui::GetIO();
-		for (int i = 0; i < 256; i++)
-			io.KeysDown[i] = input.KeysDown[i];
-		io.KeyCtrl = input.KeyCtrl;
-		io.KeyShift = input.KeyShift;
-		io.MousePos = input.MousePos;
-		io.MouseDown[0] = (input.MouseButtons & 1);
-		io.MouseDown[1] = (input.MouseButtons & 2) != 0;
-		io.MouseWheel = (float)input.MouseWheel;
+	ImGuiIO& io = ImGui::GetIO();
+	for (int i = 0; i < 256; i++)
+	io.KeysDown[i] = input.KeysDown[i];
+	io.KeyCtrl = input.KeyCtrl;
+	io.KeyShift = input.KeyShift;
+	io.MousePos = input.MousePos;
+	io.MouseDown[0] = (input.MouseButtons & 1);
+	io.MouseDown[1] = (input.MouseButtons & 2) != 0;
+	io.MouseWheel = (float)input.MouseWheel;
 	}
 	else*/
-		// @RemoteImgui end
+	// @RemoteImgui end
 	{
 		// Setup inputs
 		// (we already got mouse wheel, keyboard keys & characters from glfw callbacks polled in glfwPollEvents())
@@ -381,15 +384,17 @@ void ReymentaServerApp::update()
 	//mProg->uniform("iMouse", mMouseCoord);
 	//mProg->uniform("iChannel0", 0);
 
-	//CI_LOG_V("update end");
-	//CI_LOG_V(getElapsedFrames());
+	if (mFirstLaunch) {
+		CI_LOG_V("update end");
+	}
 
 }
 
 void ReymentaServerApp::draw()
 {
-	//CI_LOG_V("draw begin");
-	//CI_LOG_V(getElapsedFrames());
+	if (mFirstLaunch) {
+		CI_LOG_V("draw begin");
+	}
 	// clear the window and set the drawing color to white
 	gl::clear();
 	gl::color(Color::white());
@@ -425,7 +430,7 @@ void ReymentaServerApp::draw()
 	ui::NewFrame();
 
 	gl::setMatricesWindow(getWindowSize());
-	xPos = margin ;
+	xPos = margin;
 	yPos = margin + 30;
 
 #pragma region Info
@@ -615,13 +620,15 @@ void ReymentaServerApp::draw()
 #pragma endregion OSC
 
 	ui::Render();
-	
+
 	gl::ScopedGlslProg shader(mBatchass->getShadersRef()->getLiveShader());
 	//gl::ScopedGlslProg shader(mProg);
 
 	gl::draw(mMesh);
-	//CI_LOG_V("draw end");
-	//CI_LOG_V(getElapsedFrames());
+	if (mFirstLaunch) {
+		CI_LOG_V("draw end");
+		mFirstLaunch = false;
+	}
 
 }
 // From imgui by Omar Cornut

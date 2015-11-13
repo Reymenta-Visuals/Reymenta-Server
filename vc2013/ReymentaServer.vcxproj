@@ -41,10 +41,10 @@
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c:\tmp\vs\$(TargetName)\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">c:\tmp\vs\$(TargetName)\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -113,24 +113,6 @@ rem xcopy /y "..\..\..\blocks\Cinder-Spout\lib\SpoutPanel.exe" "$(OutDir)"</Com
   </ItemDefinitionGroup>
   <ItemGroup>
     <ResourceCompile Include="Resources.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\assets\0.glsl" />
-    <None Include="..\assets\1.glsl" />
-    <None Include="..\assets\2.glsl" />
-    <None Include="..\assets\3.glsl" />
-    <None Include="..\assets\4.glsl" />
-    <None Include="..\assets\default.fs" />
-    <None Include="..\assets\default.vs" />
-    <None Include="..\assets\live.frag" />
-    <None Include="..\assets\live.vert" />
-    <None Include="..\assets\mix.frag" />
-    <None Include="..\assets\passthru.frag" />
-    <None Include="..\assets\passthru.vert" />
-    <None Include="..\assets\shadertoy.inc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="..\assets\Settings.xml" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\blocks\Cinder-Reymenta\include\Logan.h" />
